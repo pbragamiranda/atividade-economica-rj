@@ -1,0 +1,1170 @@
+<p>A prefeitura do Rio de Janeiro disponibiliza uma vasta quantidade de dados em seu portal de transparência de dados, <a href="http://www.data.rio/">data.rio</a>. Muitas dessas bases de dados, principalmente as relacionadas a economia fluminense, são disponibilizadas seguindo as divisões de Áreas de Planejamento (AP), Regiões de Planejamento (RP), Regiões Admininistrativas (RA) e Bairros. Apesar de estarem em formato de planilha (xls), os dados são dividios em diferentes abas, uma para cada ano, e em uma estrutura que não permite análises básicas como evolução de série histórica.</p>
+
+<p>A base de dado que vamos usar pode ser encontra aqui -&gt; <a href="http://www.data.rio/datasets/n%C3%BAmero-de-empregados-por-atividade-econ%C3%B4mica-segundo-as-%C3%A1reas-de-planejamento-ap-regi%C3%B5es-administrativas-ra-e-bairros-no-munic%C3%ADpio-do-rio-de-janeiro-em-2005-2018">Número de empregados por atividade econômica segundo as Áreas de Planejamento (AP), Regiões Administrativas (RA) e Bairros</a></p>
+
+<p>Esses dados me chamaram atenção para entender melhor a regionalização econõmica da cidade.</p>
+
+<p>Podemos notar que a estrutura é bastante poluída, com linhas sem relevância para análises, com a divisória horizontal entre APs, RPs, RAs e bairro e com os anos separados em abas. Com isso, precisamos limpar os dados e transformá-los em uma estrutura onde seja possível realizar análises estatísticas.</p>
+
+<p><img src="/home/blackmamba/data_analysis/atividades_econ_rio/data-xls.png" alt="title" /></p>
+
+<h3 id="limpando-somente-uma-aba--ano">Limpando somente uma aba / ano</h3>
+
+<p>Primeiro, vamos limpar somente um aba, o ano de 2005, para depois aplicar os mesmo procedimentos em todas as outras.</p>
+
+<p>Essa primeira etapa demandou um pequeno trabalho manual de contar as linhas que e colunas que desejava manter e quais deseja excluir. Como todos os dados disponibilizados nessa divisão regionaliza apresentam esse mesmo padrão, pelo menos foi um trabalho de uma vez só, podendo ser aplicado em outras bases.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#import pandas
+</span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="c1">#select files
+</span><span class="n">file_path_empregados</span> <span class="o">=</span>  <span class="s">"raw_data/atividades_econ_rj_ap.xls"</span>
+
+<span class="c1">#trying cleaning for one 2005 sheet
+</span><span class="n">dataframe_2005</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">file_path_empregados</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s">"2005"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="n">nrows</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="s">"A:Z"</span><span class="p">)</span>
+
+<span class="c1">#delete uncessary rows
+</span><span class="n">dataframe_2005</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="mi">69</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">92</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">133</span><span class="p">,</span> <span class="mi">134</span><span class="p">,</span> <span class="mi">139</span><span class="p">,</span> <span class="mi">146</span><span class="p">,</span> <span class="mi">147</span><span class="p">,</span> <span class="mi">163</span><span class="p">,</span> <span class="mi">164</span><span class="p">,</span> <span class="mi">165</span><span class="p">,</span> 
+         <span class="mi">166</span><span class="p">,</span> <span class="mi">177</span><span class="p">,</span> <span class="mi">179</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">189</span><span class="p">,</span> <span class="mi">190</span><span class="p">,</span> <span class="mi">191</span><span class="p">,</span> <span class="mi">192</span><span class="p">,</span> <span class="mi">197</span><span class="p">,</span> <span class="mi">204</span><span class="p">,</span> <span class="mi">205</span><span class="p">,</span> <span class="mi">211</span><span class="p">,</span> <span class="mi">212</span><span class="p">,</span> <span class="mi">216</span><span class="p">,</span> <span class="mi">217</span><span class="p">,</span> <span class="mi">221</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Agora já temos os dados estruturados por bairros e todas as diversas atividades econômicas.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dataframe_2005</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Bairros</th>
+      <th>Extrativa mineral</th>
+      <th>Minerais não-metálicos</th>
+      <th>Indústria metalúrgica</th>
+      <th>Indústria mecânica</th>
+      <th>Indústria do material elétrico e de comunicações</th>
+      <th>Indústria de material de transporte</th>
+      <th>Indústria da madeira e do mobiliário</th>
+      <th>Indústria do papel, papelão, editorial e gráfica</th>
+      <th>Indústria da borracha, fumo, couros, peles, similares e diversas</th>
+      <th>...</th>
+      <th>Comércio varejista</th>
+      <th>Comércio atacadista</th>
+      <th>Instituições de crédito, seguros e capitalização</th>
+      <th>Comércio e administração de imóveis, valores mobiliários, serviços técnicos</th>
+      <th>Transportes e comunicações</th>
+      <th>Serviços de alojamento, alimentação, reparação, manutenção, redação...</th>
+      <th>Serviços médicos, odontológicos e veterinários</th>
+      <th>Ensino</th>
+      <th>Administração pública direta e autárquica</th>
+      <th>Agricultura, silvicultura, criação de animais, extrativismo vegetal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6</th>
+      <td>Saúde</td>
+      <td>-</td>
+      <td>5</td>
+      <td>2</td>
+      <td>9</td>
+      <td>11</td>
+      <td>3</td>
+      <td>-</td>
+      <td>13</td>
+      <td>12</td>
+      <td>...</td>
+      <td>698</td>
+      <td>74</td>
+      <td>30</td>
+      <td>696</td>
+      <td>797</td>
+      <td>154</td>
+      <td>50</td>
+      <td>39</td>
+      <td>385</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>Gamboa</td>
+      <td>-</td>
+      <td>8</td>
+      <td>30</td>
+      <td>8</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>103</td>
+      <td>-</td>
+      <td>...</td>
+      <td>380</td>
+      <td>99</td>
+      <td>29</td>
+      <td>550</td>
+      <td>932</td>
+      <td>507</td>
+      <td>7</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>Santo Cristo</td>
+      <td>-</td>
+      <td>-</td>
+      <td>39</td>
+      <td>83</td>
+      <td>47</td>
+      <td>-</td>
+      <td>48</td>
+      <td>157</td>
+      <td>132</td>
+      <td>...</td>
+      <td>571</td>
+      <td>349</td>
+      <td>24</td>
+      <td>825</td>
+      <td>6540</td>
+      <td>571</td>
+      <td>178</td>
+      <td>-</td>
+      <td>-</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>Caju</td>
+      <td>14</td>
+      <td>-</td>
+      <td>132</td>
+      <td>-</td>
+      <td>-</td>
+      <td>742</td>
+      <td>3</td>
+      <td>742</td>
+      <td>-</td>
+      <td>...</td>
+      <td>122</td>
+      <td>1</td>
+      <td>24</td>
+      <td>158</td>
+      <td>481</td>
+      <td>280</td>
+      <td>6</td>
+      <td>11</td>
+      <td>64</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>Centro</td>
+      <td>659</td>
+      <td>384</td>
+      <td>301</td>
+      <td>1172</td>
+      <td>133</td>
+      <td>161</td>
+      <td>34</td>
+      <td>4557</td>
+      <td>849</td>
+      <td>...</td>
+      <td>24884</td>
+      <td>5259</td>
+      <td>26649</td>
+      <td>95081</td>
+      <td>19762</td>
+      <td>41974</td>
+      <td>12590</td>
+      <td>5005</td>
+      <td>243676</td>
+      <td>645</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 26 columns</p>
+</div>
+
+<p>Como ainda queremos conseguir adicionar Áreas de Planejamento (AP), Regiões de Planejamento (RP), Regiões Admininistrativas (RA) como colunas ao lado de barrios, precisamos re-estruturar os dados de forma que as atividades econômicas virem uma coluna de atributo e a quantidade de empregos uma coluna de valor.</p>
+
+<p>Para isso, vamos o método <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.melt.html">melt</a></p>
+
+<p><img src="/home/blackmamba/data_analysis/atividades_econ_rio/melt.png" alt="title" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#check all columns to be melted
+</span><span class="n">dataframe_2005</span><span class="o">.</span><span class="n">columns</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Index(['Bairros', 'Extrativa mineral', 'Minerais não-metálicos',
+       'Indústria metalúrgica', 'Indústria mecânica',
+       'Indústria do material elétrico e de comunicações',
+       'Indústria de material de transporte',
+       'Indústria da madeira e do mobiliário',
+       'Indústria do papel, papelão, editorial e gráfica',
+       'Indústria da borracha, fumo, couros, peles, similares e diversas',
+       'Indústria química de produtos farmacêuticos, veterinários, perfumaria...',
+       'Indústria têxtil do vestuário e artefatos de tecidos',
+       'Indústria de calçados',
+       'Indústria de produtos alimentícios, bebidas e álcool etílico',
+       'Serviços industriais de utilidade pública ', 'Construção civil',
+       'Comércio varejista', 'Comércio atacadista',
+       'Instituições de crédito, seguros e capitalização',
+       'Comércio e administração de imóveis, valores mobiliários, serviços técnicos',
+       'Transportes e comunicações',
+       'Serviços de alojamento, alimentação, reparação, manutenção, redação...',
+       'Serviços médicos, odontológicos e veterinários', 'Ensino',
+       'Administração pública direta e autárquica',
+       'Agricultura, silvicultura, criação de animais, extrativismo vegetal'],
+      dtype='object')
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#melt columns 
+</span><span class="n">df_melted_2005</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">dataframe_2005</span><span class="p">,</span> <span class="n">id_vars</span> <span class="o">=</span><span class="p">[</span><span class="s">'Bairros'</span><span class="p">],</span> <span class="n">value_vars</span> <span class="o">=</span><span class="p">[</span><span class="s">'Extrativa mineral'</span><span class="p">,</span> <span class="s">'Minerais não-metálicos'</span><span class="p">,</span>
+       <span class="s">'Indústria metalúrgica'</span><span class="p">,</span> <span class="s">'Indústria mecânica'</span><span class="p">,</span>
+       <span class="s">'Indústria do material elétrico e de comunicações'</span><span class="p">,</span>
+       <span class="s">'Indústria de material de transporte'</span><span class="p">,</span>
+       <span class="s">'Indústria da madeira e do mobiliário'</span><span class="p">,</span>
+       <span class="s">'Indústria do papel, papelão, editorial e gráfica'</span><span class="p">,</span>
+       <span class="s">'Indústria da borracha, fumo, couros, peles, similares e diversas'</span><span class="p">,</span>
+       <span class="s">'Indústria química de produtos farmacêuticos, veterinários, perfumaria...'</span><span class="p">,</span>
+       <span class="s">'Indústria têxtil do vestuário e artefatos de tecidos'</span><span class="p">,</span>
+       <span class="s">'Indústria de calçados'</span><span class="p">,</span>
+       <span class="s">'Indústria de produtos alimentícios, bebidas e álcool etílico'</span><span class="p">,</span>
+       <span class="s">'Serviços industriais de utilidade pública '</span><span class="p">,</span> <span class="s">'Construção civil'</span><span class="p">,</span>
+       <span class="s">'Comércio varejista'</span><span class="p">,</span> <span class="s">'Comércio atacadista'</span><span class="p">,</span>
+       <span class="s">'Instituições de crédito, seguros e capitalização'</span><span class="p">,</span>
+       <span class="s">'Comércio e administração de imóveis, valores mobiliários, serviços técnicos'</span><span class="p">,</span>
+       <span class="s">'Transportes e comunicações'</span><span class="p">,</span>
+       <span class="s">'Serviços de alojamento, alimentação, reparação, manutenção, redação...'</span><span class="p">,</span>
+       <span class="s">'Serviços médicos, odontológicos e veterinários'</span><span class="p">,</span> <span class="s">'Ensino'</span><span class="p">,</span>
+       <span class="s">'Administração pública direta e autárquica'</span><span class="p">,</span>
+       <span class="s">'Agricultura, silvicultura, criação de animais, extrativismo vegetal'</span><span class="p">],</span> 
+        <span class="n">var_name</span> <span class="o">=</span><span class="s">'Atividade-Economica'</span><span class="p">,</span> <span class="n">value_name</span> <span class="o">=</span> <span class="s">"Numero-Empregos"</span><span class="p">)</span> 
+
+<span class="c1">#find and replace "-" to 0 
+</span><span class="n">df_melted_2005</span><span class="p">[</span><span class="s">'Numero-Empregos'</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'-'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Pronto, agora temos os dados estruturados por bairros e atividade econômica.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#check df new structure order by bairros
+</span><span class="n">df_melted_2005</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s">'Bairros'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Bairros</th>
+      <th>Atividade-Economica</th>
+      <th>Numero-Empregos</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2003</th>
+      <td>Abolição</td>
+      <td>Indústria de produtos alimentícios, bebidas e ...</td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <th>383</th>
+      <td>Abolição</td>
+      <td>Indústria metalúrgica</td>
+      <td>17</td>
+    </tr>
+    <tr>
+      <th>2813</th>
+      <td>Abolição</td>
+      <td>Instituições de crédito, seguros e capitalização</td>
+      <td>88</td>
+    </tr>
+    <tr>
+      <th>2489</th>
+      <td>Abolição</td>
+      <td>Comércio varejista</td>
+      <td>1451</td>
+    </tr>
+    <tr>
+      <th>1031</th>
+      <td>Abolição</td>
+      <td>Indústria da madeira e do mobiliário</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>866</th>
+      <td>Água Santa</td>
+      <td>Indústria de material de transporte</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3296</th>
+      <td>Água Santa</td>
+      <td>Serviços de alojamento, alimentação, reparação...</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>218</th>
+      <td>Água Santa</td>
+      <td>Minerais não-metálicos</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2000</th>
+      <td>Água Santa</td>
+      <td>Indústria de produtos alimentícios, bebidas e ...</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3134</th>
+      <td>Água Santa</td>
+      <td>Transportes e comunicações</td>
+      <td>287</td>
+    </tr>
+  </tbody>
+</table>
+<p>4050 rows × 3 columns</p>
+</div>
+
+<p>Agora precisamos adicionar as colunas referentes as Áreas de Planejamento (AP), Regiões de Planejamento (RP), Regiões Admininistrativas (RA). Para isso também tive que fazer um trabalho um pouco manual estruturando elas em um csv separado.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#import bairros, areas de planejamento, regiao de planejamento e regiao administrativa
+</span><span class="n">file_path_bairros</span> <span class="o">=</span> <span class="s">"raw_data/AP-RP-RA-Bairros.csv"</span>
+<span class="n">bairros</span> <span class="o">=</span>  <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path_bairros</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#check
+</span><span class="n">bairros</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AP</th>
+      <th>RP</th>
+      <th>RA</th>
+      <th>Bairros</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Gamboa</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Santo Cristo</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>As duas tabelas que temos a nossa disposição possuem a coluna Bairros, nos pemitindo juntá-las usando essa coluna como indexador. Além disso, precisamos adicionar o ano referente a aba que estamos trabalhando</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#merge empregos with bairros on column Bairros
+</span><span class="n">complete_2005</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_melted_2005</span><span class="p">,</span> <span class="n">bairros</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s">'Bairros'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">complete_2005</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Bairros</th>
+      <th>Atividade-Economica</th>
+      <th>Numero-Empregos</th>
+      <th>AP</th>
+      <th>RP</th>
+      <th>RA</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Saúde</td>
+      <td>Extrativa mineral</td>
+      <td>0</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Saúde</td>
+      <td>Minerais não-metálicos</td>
+      <td>5</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Saúde</td>
+      <td>Indústria metalúrgica</td>
+      <td>2</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Saúde</td>
+      <td>Indústria mecânica</td>
+      <td>9</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Saúde</td>
+      <td>Indústria do material elétrico e de comunicações</td>
+      <td>11</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#add year to dataframe and reorder columns 
+</span><span class="n">complete_2005</span><span class="p">[</span><span class="s">'Ano'</span><span class="p">]</span> <span class="o">=</span> <span class="s">'2005'</span>
+<span class="n">complete_2005</span> <span class="o">=</span> <span class="n">complete_2005</span><span class="p">[[</span><span class="s">'Ano'</span><span class="p">,</span> <span class="s">'AP'</span><span class="p">,</span> <span class="s">'RP'</span><span class="p">,</span> <span class="s">'RA'</span><span class="p">,</span> <span class="s">'Bairros'</span><span class="p">,</span> <span class="s">'Atividade-Economica'</span><span class="p">,</span> <span class="s">'Numero-Empregos'</span><span class="p">]]</span>
+</code></pre></div></div>
+
+<p>Pronto! Agora temos os mesmo dados da planilha disponibilizada pela prefeitura em uma estrutura mais amigável para análises.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#check
+</span><span class="n">complete_2005</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Ano</th>
+      <th>AP</th>
+      <th>RP</th>
+      <th>RA</th>
+      <th>Bairros</th>
+      <th>Atividade-Economica</th>
+      <th>Numero-Empregos</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Extrativa mineral</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Minerais não-metálicos</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria metalúrgica</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria mecânica</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria do material elétrico e de comunicações</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>3995</th>
+      <td>2005</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Serviços de alojamento, alimentação, reparação...</td>
+      <td>120</td>
+    </tr>
+    <tr>
+      <th>3996</th>
+      <td>2005</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Serviços médicos, odontológicos e veterinários</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>3997</th>
+      <td>2005</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Ensino</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>3998</th>
+      <td>2005</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Administração pública direta e autárquica</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3999</th>
+      <td>2005</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Agricultura, silvicultura, criação de animais,...</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>4000 rows × 7 columns</p>
+</div>
+
+<h3 id="iterando-o-mesmo-processo-em-para-todos-os-anos--abas">Iterando o mesmo processo em para todos os anos / abas</h3>
+
+<p>Uma vez válidada as etapas de transformação / limpeza dos dados para uma aba precisamos iterar os mesmo processos para todos os outros anos / abas.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#loop all years in every sheet
+#create empty dataframe
+</span><span class="n">empregados</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+<span class="c1">#every sheets name related to its year
+</span><span class="n">anos</span> <span class="o">=</span>  <span class="p">[</span><span class="s">'2005'</span><span class="p">,</span> <span class="s">'2006'</span><span class="p">,</span> <span class="s">'2007'</span><span class="p">,</span> <span class="s">'2008'</span><span class="p">,</span> <span class="s">'2009'</span><span class="p">,</span> <span class="s">'2010'</span><span class="p">,</span> <span class="s">'2011'</span><span class="p">,</span> <span class="s">'2012'</span><span class="p">,</span> <span class="s">'2013'</span><span class="p">,</span> <span class="s">'2014'</span><span class="p">,</span> <span class="s">'2015'</span><span class="p">,</span> <span class="s">'2016'</span><span class="p">,</span> <span class="s">'2017'</span><span class="p">,</span> <span class="s">'2018'</span><span class="p">]</span>
+
+<span class="c1">#repeat all the steps looping every year
+</span>
+<span class="k">for</span> <span class="n">ano</span> <span class="ow">in</span> <span class="n">anos</span><span class="p">:</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">file_path_empregados</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="n">ano</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="n">nrows</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="s">"A:Z"</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="mi">69</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">92</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">133</span><span class="p">,</span> <span class="mi">134</span><span class="p">,</span> <span class="mi">139</span><span class="p">,</span> <span class="mi">146</span><span class="p">,</span> <span class="mi">147</span><span class="p">,</span> <span class="mi">163</span><span class="p">,</span> <span class="mi">164</span><span class="p">,</span> <span class="mi">165</span><span class="p">,</span> 
+         <span class="mi">166</span><span class="p">,</span> <span class="mi">177</span><span class="p">,</span> <span class="mi">179</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">189</span><span class="p">,</span> <span class="mi">190</span><span class="p">,</span> <span class="mi">191</span><span class="p">,</span> <span class="mi">192</span><span class="p">,</span> <span class="mi">197</span><span class="p">,</span> <span class="mi">204</span><span class="p">,</span> <span class="mi">205</span><span class="p">,</span> <span class="mi">211</span><span class="p">,</span> <span class="mi">212</span><span class="p">,</span> <span class="mi">216</span><span class="p">,</span> <span class="mi">217</span><span class="p">,</span> <span class="mi">221</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">df_melt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_vars</span> <span class="o">=</span><span class="p">[</span><span class="s">'Bairros'</span><span class="p">],</span> <span class="n">value_vars</span> <span class="o">=</span><span class="p">[</span><span class="s">'Extrativa mineral'</span><span class="p">,</span> <span class="s">'Minerais não-metálicos'</span><span class="p">,</span>
+       <span class="s">'Indústria metalúrgica'</span><span class="p">,</span> <span class="s">'Indústria mecânica'</span><span class="p">,</span>
+       <span class="s">'Indústria do material elétrico e de comunicações'</span><span class="p">,</span>
+       <span class="s">'Indústria de material de transporte'</span><span class="p">,</span>
+       <span class="s">'Indústria da madeira e do mobiliário'</span><span class="p">,</span>
+       <span class="s">'Indústria do papel, papelão, editorial e gráfica'</span><span class="p">,</span>
+       <span class="s">'Indústria da borracha, fumo, couros, peles, similares e diversas'</span><span class="p">,</span>
+       <span class="s">'Indústria química de produtos farmacêuticos, veterinários, perfumaria...'</span><span class="p">,</span>
+       <span class="s">'Indústria têxtil do vestuário e artefatos de tecidos'</span><span class="p">,</span>
+       <span class="s">'Indústria de calçados'</span><span class="p">,</span>
+       <span class="s">'Indústria de produtos alimentícios, bebidas e álcool etílico'</span><span class="p">,</span>
+       <span class="s">'Serviços industriais de utilidade pública '</span><span class="p">,</span> <span class="s">'Construção civil'</span><span class="p">,</span>
+       <span class="s">'Comércio varejista'</span><span class="p">,</span> <span class="s">'Comércio atacadista'</span><span class="p">,</span>
+       <span class="s">'Instituições de crédito, seguros e capitalização'</span><span class="p">,</span>
+       <span class="s">'Comércio e administração de imóveis, valores mobiliários, serviços técnicos'</span><span class="p">,</span>
+       <span class="s">'Transportes e comunicações'</span><span class="p">,</span>
+       <span class="s">'Serviços de alojamento, alimentação, reparação, manutenção, redação...'</span><span class="p">,</span>
+       <span class="s">'Serviços médicos, odontológicos e veterinários'</span><span class="p">,</span> <span class="s">'Ensino'</span><span class="p">,</span>
+       <span class="s">'Administração pública direta e autárquica'</span><span class="p">,</span>
+       <span class="s">'Agricultura, silvicultura, criação de animais, extrativismo vegetal'</span><span class="p">],</span> 
+        <span class="n">var_name</span> <span class="o">=</span><span class="s">'Atividade-Economica'</span><span class="p">,</span> <span class="n">value_name</span> <span class="o">=</span> <span class="s">"Numero-Empregos"</span><span class="p">)</span>
+    <span class="n">df_melt</span><span class="p">[</span><span class="s">'Numero-Empregos'</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'-'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">df_merged</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_melt</span><span class="p">,</span> <span class="n">bairros</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s">'Bairros'</span><span class="p">)</span>
+    <span class="n">df_merged</span><span class="p">[</span><span class="s">'Ano'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ano</span>
+    <span class="n">df_merged</span> <span class="o">=</span> <span class="n">df_merged</span><span class="p">[[</span><span class="s">'Ano'</span><span class="p">,</span> <span class="s">'AP'</span><span class="p">,</span> <span class="s">'RP'</span><span class="p">,</span> <span class="s">'RA'</span><span class="p">,</span> <span class="s">'Bairros'</span><span class="p">,</span> <span class="s">'Atividade-Economica'</span><span class="p">,</span> <span class="s">'Numero-Empregos'</span><span class="p">]]</span>
+    <span class="n">empregados</span> <span class="o">=</span> <span class="n">empregados</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_merged</span><span class="p">,</span><span class="n">ignore_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Feito! Todos as planilhas em uma única base de dados com os dados divídios por Ano, AP, RP, RA, Bairro, Atividade Econômica e Número de empregos. 
+Podemos salvar em csv para futuras análises.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">empregados</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Ano</th>
+      <th>AP</th>
+      <th>RP</th>
+      <th>RA</th>
+      <th>Bairros</th>
+      <th>Atividade-Economica</th>
+      <th>Numero-Empregos</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Extrativa mineral</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Minerais não-metálicos</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria metalúrgica</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria mecânica</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria do material elétrico e de comunicações</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>55995</th>
+      <td>2018</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Serviços de alojamento, alimentação, reparação...</td>
+      <td>118</td>
+    </tr>
+    <tr>
+      <th>55996</th>
+      <td>2018</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Serviços médicos, odontológicos e veterinários</td>
+      <td>12</td>
+    </tr>
+    <tr>
+      <th>55997</th>
+      <td>2018</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Ensino</td>
+      <td>201</td>
+    </tr>
+    <tr>
+      <th>55998</th>
+      <td>2018</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Administração pública direta e autárquica</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>55999</th>
+      <td>2018</td>
+      <td>Área de Planejamento 5</td>
+      <td>Região de Planejamento 5.4</td>
+      <td>XXVI Guaratiba</td>
+      <td>Pedra de Guaratiba</td>
+      <td>Agricultura, silvicultura, criação de animais,...</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>56000 rows × 7 columns</p>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#save to df to csv
+</span><span class="n">empregados</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s">r'/home/blackmamba/data_analysis/atividades_econ_rio/clean_data/atividades_econ_rj_ap_bairros_clean.csv'</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="breve-análise">Breve análise</h3>
+
+<p>Essa texto foi focado na limpeza dos dados e não em sua análise. Entretando, me proponho a fazer uma breve investigação.</p>
+
+<p>A cidade do Rio de Janeiro possui um problema grave de planejamento urbano onde o centro da cidade concentra maior parte dos empregos ofertados porém baixíssima oportunidade de moradia. Uma breve análise que me despertou curiosidade foi justamente analisar essa hipótese, cruzando os dados de população residente com oferta de número de empregos por Região Administrativa.</p>
+
+<p>Chamo de breve análise pois 1) os dados disponibilizados são frágeis (i.e população residente é uma estimativa, Rocinha aparece com 0 empregos), 2) setor informal é bastante presente no Rio de Janeiro e 3) o cruzamento de dados é apenar um primeiro indicador para testar uma hipóteses.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#data path
+</span><span class="n">file_path_empregos</span> <span class="o">=</span> <span class="s">"/home/blackmamba/data_analysis/atividades_econ_rio/clean_data/atividades_econ_rj_ap_bairros_clean.csv"</span>
+<span class="n">file_path_populacao</span> <span class="o">=</span> <span class="s">"/home/blackmamba/data_analysis/atividades_econ_rio/clean_data/População Residente e Estimada.csv"</span>
+
+<span class="c1">#read csv as dataframe
+</span><span class="n">df_empregos</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path_empregos</span><span class="p">)</span>
+<span class="n">df_populacao</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path_populacao</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#check
+</span><span class="n">df_empregos</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Ano</th>
+      <th>AP</th>
+      <th>RP</th>
+      <th>RA</th>
+      <th>Bairros</th>
+      <th>Atividade-Economica</th>
+      <th>Numero-Empregos</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Extrativa mineral</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Minerais não-metálicos</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria metalúrgica</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria mecânica</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2005</td>
+      <td>Área de Planejamento 1</td>
+      <td>Região de Planejamento 1.1</td>
+      <td>I Portuária</td>
+      <td>Saúde</td>
+      <td>Indústria do material elétrico e de comunicações</td>
+      <td>11</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#check
+</span><span class="n">df_populacao</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>RAS</th>
+      <th>2000</th>
+      <th>2010</th>
+      <th>2013</th>
+      <th>2014</th>
+      <th>2015</th>
+      <th>2016</th>
+      <th>2020</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>I Portuária</td>
+      <td>39.97</td>
+      <td>48.66</td>
+      <td>51.41</td>
+      <td>52.00</td>
+      <td>52.55</td>
+      <td>53.09</td>
+      <td>55.07</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>II Centro</td>
+      <td>39.14</td>
+      <td>41.14</td>
+      <td>41.78</td>
+      <td>41.91</td>
+      <td>42.04</td>
+      <td>42.16</td>
+      <td>42.62</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>III Rio Comprido</td>
+      <td>73.66</td>
+      <td>78.98</td>
+      <td>80.66</td>
+      <td>81.01</td>
+      <td>81.35</td>
+      <td>81.68</td>
+      <td>82.89</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>IV Botafogo</td>
+      <td>238.90</td>
+      <td>239.73</td>
+      <td>239.99</td>
+      <td>240.05</td>
+      <td>240.10</td>
+      <td>240.15</td>
+      <td>240.34</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>IX Vila Isabel</td>
+      <td>186.01</td>
+      <td>189.31</td>
+      <td>190.35</td>
+      <td>190.57</td>
+      <td>190.79</td>
+      <td>190.99</td>
+      <td>191.74</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#filter 2016
+</span><span class="n">df_pop_2016</span> <span class="o">=</span> <span class="n">df_populacao</span><span class="p">[[</span><span class="s">'RAS'</span><span class="p">,</span> <span class="s">'2016'</span><span class="p">]]</span>
+<span class="n">df_emp_2016</span> <span class="o">=</span> <span class="n">df_empregos</span><span class="p">[</span><span class="n">df_empregos</span><span class="p">[</span><span class="s">'Ano'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2016</span><span class="p">]</span>
+
+<span class="n">df_emp_2016</span> <span class="o">=</span> <span class="n">df_emp_2016</span><span class="p">[[</span><span class="s">'RA'</span><span class="p">,</span> <span class="s">'Numero-Empregos'</span><span class="p">]]</span>
+
+<span class="n">df_pop_2016</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s">'RAS'</span><span class="p">,</span> <span class="s">'Populacao'</span><span class="p">]</span>
+<span class="n">df_emp_2016</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s">'RAS'</span><span class="p">,</span> <span class="s">'Numero-Empregos'</span><span class="p">]</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#groupby 2016
+</span><span class="n">df_emp_2016</span> <span class="o">=</span> <span class="n">df_emp_2016</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s">'RAS'</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#merge on RAs
+</span><span class="n">df_complete</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_pop_2016</span><span class="p">,</span> <span class="n">df_emp_2016</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s">'RAS'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#add proportion columns
+</span><span class="n">df_complete</span><span class="p">[</span><span class="s">'Pop </span><span class="si">%</span><span class="s">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_complete</span><span class="o">.</span><span class="n">Populacao</span> <span class="o">/</span> <span class="n">df_complete</span><span class="o">.</span><span class="n">Populacao</span><span class="o">.</span><span class="nb">sum</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="n">df_complete</span><span class="p">[</span><span class="s">'Emprego </span><span class="si">%</span><span class="s">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_complete</span><span class="p">[</span><span class="s">'Numero-Empregos'</span><span class="p">]</span> <span class="o">/</span> <span class="n">df_complete</span><span class="p">[</span><span class="s">'Numero-Empregos'</span><span class="p">]</span><span class="o">.</span><span class="nb">sum</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#check
+</span><span class="n">df_complete</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>RAS</th>
+      <th>Populacao</th>
+      <th>Numero-Empregos</th>
+      <th>Pop %</th>
+      <th>Emprego %</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>I Portuária</td>
+      <td>53.09</td>
+      <td>108607</td>
+      <td>0.809789</td>
+      <td>4.783663</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>II Centro</td>
+      <td>42.16</td>
+      <td>500209</td>
+      <td>0.643072</td>
+      <td>22.032019</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>III Rio Comprido</td>
+      <td>81.68</td>
+      <td>140159</td>
+      <td>1.245876</td>
+      <td>6.173391</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>IV Botafogo</td>
+      <td>240.15</td>
+      <td>148052</td>
+      <td>3.663040</td>
+      <td>6.521043</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>IX Vila Isabel</td>
+      <td>190.99</td>
+      <td>51739</td>
+      <td>2.913196</td>
+      <td>2.278877</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">'fivethirtyeight'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span> 
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df_complete</span><span class="p">[</span><span class="s">'RAS'</span><span class="p">],</span> <span class="n">df_complete</span><span class="p">[</span><span class="s">'Pop </span><span class="si">%</span><span class="s">'</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s">'População </span><span class="si">%</span><span class="s">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df_complete</span><span class="p">[</span><span class="s">'RAS'</span><span class="p">],</span> <span class="n">df_complete</span><span class="p">[</span><span class="s">'Emprego </span><span class="si">%</span><span class="s">'</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s">'Emprego </span><span class="si">%</span><span class="s">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="post-data-clean_files/post-data-clean_34_0.png" alt="png" /></p>
+
+<p>Em uma primeira leitura dos dados a hipótese previamente discutida parece ser verdadeira!</p>
